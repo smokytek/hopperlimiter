@@ -1,0 +1,6 @@
+name: HopperLimiter
+version: 1.0
+main: com.smokytek.hopperlimiter.HopperLimiter
+api-version: 1.20 
+authors: [Smokytek]
+description: Limita il numero di hopper posizionabili per chunk.
