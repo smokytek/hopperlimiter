@@ -1,1 +1,5 @@
 max-hoppers-per-chunk: 10
+
+excluded-worlds:
+  - nome_del_mondo_da_escludere
+  - nome_di_un_altro_mondo_da_escludere
