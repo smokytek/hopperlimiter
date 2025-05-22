@@ -20,12 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HopperPlacementListeners implements Listener {
 
     private final int maxHoppersPerChunk;
-    private final ConcurrentHashMap<Chunk, Integer> hopperCounts = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Chunk, Integer> hopperCounts = new ConcurrentHashMap<>();
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
 
     private static final long COOLDOWN_MILLIS = 2000;
-    private static final int WORLD_MIN_Y = -64;
-    private static final int WORLD_MAX_Y = 319;
 
     public HopperPlacementListeners(HopperLimiter plugin) {
         this.maxHoppersPerChunk = plugin.getConfig().getInt("max-hoppers-per-chunk", 10);
@@ -39,12 +37,16 @@ public class HopperPlacementListeners implements Listener {
         int hoppers = 0;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = WORLD_MIN_Y; y <= WORLD_MAX_Y; y++) {
-                    Block block = chunk.getBlock(x, y, z);
-                    if (block.getType() == Material.HOPPER) {
-                        hoppers++;
-                    }
-                }
+            	int minY = chunk.getWorld().getMinHeight();
+            	int maxY = chunk.getWorld().getMaxHeight();
+
+            	for (int y = minY; y < maxY; y++) {
+            	    Block block = chunk.getBlock(x, y, z);
+            	    if (block.getType() == Material.HOPPER) {
+            	        hoppers++;
+            	    }
+            	}
+
             }
         }
         hopperCounts.put(chunk, hoppers);
@@ -55,8 +57,12 @@ public class HopperPlacementListeners implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         if (event.getBlock().getType() == Material.HOPPER) {
             Player player = event.getPlayer();
-            Chunk chunk = event.getBlock().getChunk();
 
+            if (player.hasPermission("hopperlimiter.bypass")) {
+                return; // 
+            }
+
+            Chunk chunk = event.getBlock().getChunk();
             int hoppersInChunk = getHoppersInChunk(chunk);
 
             if (hoppersInChunk >= maxHoppersPerChunk) {
@@ -67,6 +73,7 @@ public class HopperPlacementListeners implements Listener {
             }
         }
     }
+
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
